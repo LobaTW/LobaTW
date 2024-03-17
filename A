@@ -1,0 +1,67 @@
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+
+namespace HomeworkRegistrationSystem.Controllers
+{
+    public class HomeworkController : Controller
+    {
+        // 正確的密碼
+        private const string CorrectPassword = "beagoodteacher";
+
+        // 儲存學生的缺交紀錄
+        private static List<MissingHomework> missingHomeworks = new List<MissingHomework>();
+
+        // 登錄頁面
+        public IActionResult Login()
+        {
+            return View();
+        }
+
+        // 登錄驗證
+        [HttpPost]
+        public IActionResult Login(string password)
+        {
+            if (password == CorrectPassword)
+            {
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                TempData["Error"] = "密碼錯誤！";
+                return RedirectToAction("Login");
+            }
+        }
+
+        // 首頁
+        public IActionResult Index()
+        {
+            return View(missingHomeworks);
+        }
+
+        // 新增缺交功課
+        [HttpPost]
+        public IActionResult AddMissingHomework(int studentNumber, string homework)
+        {
+            if (ModelState.IsValid)
+            {
+                missingHomeworks.Add(new MissingHomework { StudentNumber = studentNumber, Homework = homework });
+            }
+            return RedirectToAction("Index");
+        }
+
+        // 查詢缺交紀錄
+        public IActionResult QueryMissingHomework(int studentNumber)
+        {
+            var result = missingHomeworks.FindAll(item => item.StudentNumber == studentNumber);
+            return PartialView("_MissingHomeworkList", result);
+        }
+    }
+
+    // 缺交功課類型
+    public class MissingHomework
+    {
+        public int StudentNumber { get; set; }
+        public string Homework { get; set; }
+    }
+}
